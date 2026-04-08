@@ -1,0 +1,56 @@
+import React, { useState, useEffect } from 'react';
+
+/**
+ * A component demonstrating safe side-effect management.
+ */
+const SafeCounter = () => {
+    const [count, setCount] = useState(0);
+
+    useEffect(() => {
+        console.log("Effect running: Initializing timer...");
+
+        // 1. Setting up an interval (side effect)
+        const timer = setInterval(() => {
+            // 2. Functional Update: 
+            // We use 'prevCount => prevCount + 1' so we don't need 'count' 
+            // in the dependency array. This prevents the infinite loop.
+            setCount(prevCount => prevCount + 1);
+            console.log("Timer ticked!");
+        }, 1000);
+
+        // 3. Cleanup Function:
+        // This runs when the component unmounts. 
+        // It clears the interval to prevent a memory leak.
+        return () => {
+            console.log("Cleaning up: Clearing timer and unmounting...");
+            clearInterval(timer);
+        };
+
+        // 4. Empty Dependency Array:
+        // Ensures this effect only runs once on mount.
+    }, []);
+
+    return (
+        <div style= {{ padding: '20px', textAlign: 'center' }
+}>
+    <h2>Safe Counter </h2>
+        < p style = {{ fontSize: '2rem' }}> { count } </p>
+            < p > Check the console to see the mount and cleanup logs.</p>
+                </div>
+  );
+};
+
+export default function App() {
+    const [showCounter, setShowCounter] = useState(true);
+
+    return (
+        <div style= {{ padding: '40px', fontFamily: 'sans-serif' }
+}>
+    <button onClick={ () => setShowCounter(!showCounter) }>
+        { showCounter? "Unmount (Stop) Counter": "Mount (Start) Counter" }
+        </button>
+        < hr />
+        { showCounter?<SafeCounter /> : <p>Counter is unmounted.Memory is clean! </p>}
+</div>
+  );
+}
