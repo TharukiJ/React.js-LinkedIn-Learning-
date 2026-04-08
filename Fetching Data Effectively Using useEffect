@@ -1,0 +1,62 @@
+// ##DISPLAY_BEGIN##
+
+/**
+ * Fetching Data Effectively
+ * 1. useEffect handles the initial mount.
+ * 2. async/await handles the network logic.
+ * 3. try/catch/finally ensures states are reset even on failure.
+ */
+function App() {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    // Step 2: The fetchUser function
+    const fetchUser = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch('https://randomuser.me/api');
+            const data = await res.json();
+            setUser(data.results[0]);
+        } catch (error) {
+            // Step 2: Error handling
+            console.error('Failed to fetch user:', error);
+        } finally {
+            // Step 2: Ensure loading is stopped regardless of success or failure
+            setLoading(false);
+        }
+    };
+
+    // Step 1: Trigger fetch on mount only
+    useEffect(() => {
+        fetchUser();
+    }, []); // ✅ Empty dependency array
+
+    if (loading) return <div>Loading...</div>;
+
+    return (
+        <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h1>Random User</h1>
+            {user && (
+                <div style={{ marginBottom: '20px' }}>
+                    <img
+                        src={user.picture.large}
+                        alt="user"
+                        style={{ borderRadius: '50%' }}
+                    />
+                    <h3>{user.name.first} {user.name.last}</h3>
+                    <p>{user.email}</p>
+                </div>
+            )}
+
+            {/* Step 3: Trigger a new fetch manually */}
+            <button
+                onClick={fetchUser}
+                style={{ padding: '10px 20px', cursor: 'pointer' }}
+            >
+                Get New User
+            </button>
+        </div>
+    );
+}
+
+export default App;
